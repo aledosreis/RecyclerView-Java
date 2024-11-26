@@ -26,6 +26,10 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
         this.emails = emails;
     }
 
+    public List<Email> getEmails() {
+        return emails;
+    }
+
     @NonNull
     @Override
     public EmailViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
