@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ItemTouchHelper helper = new ItemTouchHelper(
-                new ItemTouchHandler(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
+                new ItemTouchHandler(0, ItemTouchHelper.LEFT)
         );
 
         helper.attachToRecyclerView(rv);
@@ -68,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-
+            emailAdapter.getEmails().remove(viewHolder.getAdapterPosition());
+            emailAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
         }
     }
 
