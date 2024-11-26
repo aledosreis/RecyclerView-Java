@@ -2,8 +2,11 @@ package com.alessandroreis.java.recyclerviewjava;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHolder> {
+
+    private EmailAdapterListener listener;
     private final List<Email> emails;
+    final SparseBooleanArray selectedItems = new SparseBooleanArray();
+    private int currentSelectedPosition;
 
     EmailAdapter(ArrayList<Email> emails) {
         this.emails = emails;
@@ -28,6 +35,10 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
 
     public List<Email> getEmails() {
         return emails;
+    }
+
+    public void setListener(EmailAdapterListener listener) {
+        this.listener = listener;
     }
 
     @NonNull
@@ -41,11 +52,46 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
     public void onBindViewHolder(@NonNull EmailViewHolder holder, int position) {
         Email email = emails.get(position);
         holder.bind(email);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (selectedItems.size() > 0 && listener != null)
+                    listener.onItemClick(position);
+            }
+        });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if (listener != null)
+                    listener.onItemLongClick(position);
+                return true;
+            }
+        });
+
+        if (currentSelectedPosition == position) currentSelectedPosition = -1;
     }
 
     @Override
     public int getItemCount() {
         return emails.size();
+    }
+
+    void deleteEmails() {
+        Log.i("Teste", "Delete Emails");
+    }
+
+    void toggleSelection(int position) {
+        currentSelectedPosition = position;
+        if (selectedItems.get(position)) {
+            selectedItems.delete(position);
+            emails.get(position).setSelected(false);
+        } else {
+            selectedItems.put(position, true);
+            emails.get(position).setSelected(true);
+        }
+        notifyItemChanged(position);
     }
 
     class EmailViewHolder extends RecyclerView.ViewHolder {
@@ -81,6 +127,23 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
             txtDate.setTypeface(Typeface.DEFAULT, email.isUnread() ? Typeface.BOLD : Typeface.NORMAL);
 
             imgStar.setImageResource(email.isStared() ? R.drawable.ic_star_black_24dp : R.drawable.ic_star_border_black_24dp);
+
+            if (email.isSelected()) {
+                txtIcon.setBackground(oval(Color.rgb(26, 115, 233), txtIcon));
+                GradientDrawable gradientDrawable = new GradientDrawable();
+                gradientDrawable.setShape(GradientDrawable.RECTANGLE);
+                gradientDrawable.setCornerRadius(32f);
+                gradientDrawable.setColor(Color.rgb(232,240, 253));
+                itemView.setBackground(gradientDrawable);
+            } else {
+                GradientDrawable gradientDrawable = new GradientDrawable();
+                gradientDrawable.setShape(GradientDrawable.RECTANGLE);
+                gradientDrawable.setCornerRadius(32f);
+                gradientDrawable.setColor(Color.WHITE);
+                itemView.setBackground(gradientDrawable);
+            }
+
+            // animation
         }
     }
 
@@ -90,5 +153,10 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
         shapeDrawable.setIntrinsicWidth(view.getWidth());
         shapeDrawable.getPaint().setColor(color);
         return shapeDrawable;
+    }
+
+    interface EmailAdapterListener {
+        void onItemClick(int position);
+        void onItemLongClick(int position);
     }
 }

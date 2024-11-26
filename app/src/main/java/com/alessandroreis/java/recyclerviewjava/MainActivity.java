@@ -1,10 +1,13 @@
 package com.alessandroreis.java.recyclerviewjava;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,11 +20,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private EmailAdapter emailAdapter;
+    private ActionMode actionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,66 @@ public class MainActivity extends AppCompatActivity {
         );
 
         helper.attachToRecyclerView(rv);
+
+        emailAdapter.setListener(new EmailAdapter.EmailAdapterListener() {
+            @Override
+            public void onItemClick(int position) {
+                enableActionMode(position);
+            }
+
+            @Override
+            public void onItemLongClick(int position) {
+                enableActionMode(position);
+            }
+        });
+    }
+
+    private void enableActionMode(int position) {
+        if (actionMode == null)
+            actionMode = startSupportActionMode(new ActionMode.Callback() {
+                @Override
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                    mode.getMenuInflater().inflate(R.menu.menu_delete, menu);
+                    return true;
+                }
+
+                @Override
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                    return false;
+                }
+
+                @Override
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    if (item.getItemId() == R.id.action_delete) {
+                        emailAdapter.deleteEmails();
+                        mode.finish();
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onDestroyActionMode(ActionMode mode) {
+                    emailAdapter.selectedItems.clear();
+                    List<Email> emails = emailAdapter.getEmails();
+                    for (Email email : emails) {
+                        if (email.isSelected())
+                            email.setSelected(false);
+                    }
+
+                    emailAdapter.notifyDataSetChanged();
+                    actionMode = null;
+                }
+            });
+
+        emailAdapter.toggleSelection(position);
+        final int size = emailAdapter.selectedItems.size();
+        if (size == 0) {
+            actionMode.finish();
+        } else {
+            actionMode.setTitle(size + "");
+            actionMode.invalidate();
+        }
     }
 
     private class ItemTouchHandler extends ItemTouchHelper.SimpleCallback {
