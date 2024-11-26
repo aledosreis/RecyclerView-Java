@@ -1,5 +1,8 @@
 package com.alessandroreis.java.recyclerviewjava;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -10,6 +13,8 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -79,7 +84,16 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
     }
 
     void deleteEmails() {
-        Log.i("Teste", "Delete Emails");
+        List<Email> emails = new ArrayList<>();
+
+        for (Email email : this.emails) {
+            if (email.isSelected())
+                emails.add(email);
+        }
+
+        this.emails.removeAll(emails);
+        notifyDataSetChanged();
+        currentSelectedPosition = -1;
     }
 
     void toggleSelection(int position) {
@@ -144,7 +158,29 @@ public class EmailAdapter extends RecyclerView.Adapter<EmailAdapter.EmailViewHol
             }
 
             // animation
+            if (selectedItems.size() > 0)
+                animate(txtIcon, email);
         }
+    }
+
+    private void animate(final TextView view, final Email email) {
+        ObjectAnimator oa1 = ObjectAnimator.ofFloat(view,"scaleX", 1f, 0f);
+        ObjectAnimator oa2 = ObjectAnimator.ofFloat(view,"scaleX", 0f, 1f);
+        oa1.setInterpolator(new DecelerateInterpolator());
+        oa2.setInterpolator(new AccelerateInterpolator());
+        oa1.setDuration(200);
+        oa2.setDuration(200);
+
+        oa1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (email.isSelected())
+                    view.setText("\u2713");
+                oa2.start();
+            }
+        });
+        oa1.start();
     }
 
     private static ShapeDrawable oval(@ColorInt int color, View view) {
