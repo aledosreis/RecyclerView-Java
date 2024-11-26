@@ -3,7 +3,9 @@ package com.alessandroreis.java.recyclerviewjava;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alessandroreis.java.recyclerviewjava.model.Email;
@@ -13,6 +15,7 @@ import com.mooveit.library.Fakeit;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -39,6 +42,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ItemTouchHelper helper = new ItemTouchHelper(
+                new ItemTouchHandler(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT)
+        );
+
+        helper.attachToRecyclerView(rv);
+    }
+
+    private class ItemTouchHandler extends ItemTouchHelper.SimpleCallback {
+
+        public ItemTouchHandler(int dragDirs, int swipeDirs) {
+            super(dragDirs, swipeDirs);
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            int from = viewHolder.getAdapterPosition();
+            int to = target.getAdapterPosition();
+
+            Collections.swap(emailAdapter.getEmails(), from, to);
+            emailAdapter.notifyItemMoved(from, to);
+
+            return true;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+        }
     }
 
     private void addEmail() {
