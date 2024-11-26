@@ -1,6 +1,6 @@
 # Recycler View em Java
 
-O projeto presente neste repositório se trata de uma réplica de um aplicativo de Emails, desenvolvido com o propósito de aprender a implementar e entender o conceito de RecyclerView.
+O projeto presente neste repositório se trata de uma réplica de um aplicativo de Emails, desenvolvido com o propósito de aprender a implementar e entender o conceito de RecyclerView utilizando a linhagem de programação Java.
 
 A aplicação permite:
 
