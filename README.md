@@ -5,6 +5,7 @@ O projeto presente neste repositório se trata de uma réplica de um aplicativo 
 A aplicação permite:
 
 - Listar itens
+- Adicionar novos itens
 - Selecionar itens
 - Remover itens
 
